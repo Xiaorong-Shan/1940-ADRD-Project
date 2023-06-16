@@ -1,7 +1,7 @@
 Exposure products for 1940-ADRD-Project
 =====
 
-•	Total exposure to all sources
+*	Total exposure to all sources
 o	Species emissions
 	Data: modeled emissions from CMIP6 (download these gridded emissions products)
 	Species
