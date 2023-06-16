@@ -45,36 +45,36 @@ Exposure products for 1940-ADRD-Project
     -	Oil/gas wells
         -	Data: oil/gas well locations (what is the source of this data?)
         -	Categories
-•	Production type
-o	Brine
-o	CBM
-o	Disposal
-o	Dry hole
-o	Gas
-o	Injection
-o	Monitor
-o	Oil
-o	Oil & Gas
-o	Other
-o	Producer
-o	Service 
-o	Storage
-o	Unknown
-o	Water 
-•	Well status
-o	Abandoned
-o	Active
-o	Cancelled
-o	Completed
-o	Drilled
-o	Inactive
-o	Orphan
-o	P & A
-o	Permitted
-o	SHUT – IN
-o	TA
+            -	Production type
+                -	Brine
+                -	CBM
+                -	Disposal
+                -	Dry hole
+                -	Gas
+                -	Injection
+                -	Monitor
+                -	Oil
+                -	Oil & Gas
+                -	Other
+                -	Producer
+                -	Service 
+                -	Storage
+                -	Unknown
+                -	Water 
+            -	Well status
+                -	Abandoned
+                -	Active
+                -	Cancelled
+                -	Completed
+                -	Drilled
+                -	Inactive
+                -	Orphan
+                -	P & A
+                -	Permitted
+                -	SHUT – IN
+                -	TA
         -	Exposure
-•	Inverse distance weighting (weighted by number of wells in each 4km grid cell)
+            -	**Inverse distance weighting (weighted by number of wells in each 4km grid cell)**
 
 
 
