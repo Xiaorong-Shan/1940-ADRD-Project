@@ -2,7 +2,7 @@ Exposure products for 1940-ADRD-Project
 =====
 
 *	Total exposure to all sources
-  -	Species emissions
+    -	Species emissions
 	Data: modeled emissions from CMIP6 (download these gridded emissions products)
 	Species
 •	BC
@@ -19,7 +19,8 @@ o	Modeled historical concentrations from CMIP6
 •	PM2.5
 •	O3
 	Exposure assessment: gridded concentrations aggregated to counties
-•	Exposure to individual source categories
+
+*	Exposure to individual source categories
 o	Power plants
 	Data: EIA generators dataset
 	Fuel types
