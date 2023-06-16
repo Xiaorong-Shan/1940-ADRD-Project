@@ -29,8 +29,8 @@ Exposure products for 1940-ADRD-Project
             -	Gas
             -	Renewable 
         -	Exposure: 
-           ** -	gridded inverse distance weighted exposure (weighted by generator capacity)
-            -	DisperseR, weighted by generator capacity**
+            -	**gridded inverse distance weighted exposure (weighted by generator capacity)**
+            -	**DisperseR, weighted by generator capacity**
     -	Automobiles
         -	Data
             -	Nationwide gasoline sales (your power point said statewide gasoline sales—which is it?)
@@ -38,8 +38,8 @@ Exposure products for 1940-ADRD-Project
             -	County population
             -	Select cities’ road networks
         -	Exposure
-        **    -	Roadiness in select cities
-            -	County concentrations based on box model**
+            -	**Roadiness in select cities**
+            -	**County concentrations based on box model**
                 -	New idea—what if we distribute emissions to PBL & windspeed grid, then estimate concentration in consistent grid instead of counties?
             -	**Roadiness-downscaled box model concentrations in select cities**
     -	Oil/gas wells
