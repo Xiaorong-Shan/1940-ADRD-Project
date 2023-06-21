@@ -2,23 +2,23 @@ Exposure products for 1940-ADRD-Project
 =====
 
 # Total exposure to all sources
-    -	Species emissions
-        -	Data: modeled emissions from CMIP6 (download these gridded emissions products)
-        -	Species
-            -	BC
-            -	SO2
-            -	Primary PM2.5
-            -	NOx
-            -	Others?
-        -	Exposure assessment
-            -	Gridded emissions spatially apportioned to counties (units: kg/s/m2)
-            -	Inverse-distance weighted emissions
-    -	Modeled historical concentrations from CMIP6
-        -	Data: CMIP6, 11 different models
-        -	Species: 
-            -	PM2.5
-            -	O3
-        -	**Exposure assessment: gridded concentrations aggregated to counties**
+## Species emissions
+### Data: modeled emissions from CMIP6 (download these gridded emissions products)
+### Species
+    - BC
+    - SO2
+    - Primary PM2.5
+    - NOx
+    - Others?
+## Exposure assessment
+### Gridded emissions spatially apportioned to counties (units: kg/s/m2)
+### Inverse-distance weighted emissions
+## Modeled historical concentrations from CMIP6
+### Data: CMIP6, 11 different models
+### Species: 
+    - PM2.5
+    - O3
+### **Exposure assessment: gridded concentrations aggregated to counties**
 
 # Exposure to individual source categories
     -	Power plants
