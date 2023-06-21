@@ -42,11 +42,7 @@ pp_exp_coal.sp <- rasterToPolygons( pp_exp_coal.r)
 pp_exp_coal.sf <- st_as_sf( pp_exp_coal.sp)
 
 # download some US data
-states <- USAboundaries::us_states()
-
-pp_exp_coal.sf$geometry <-
-  st_transform( pp_exp_coal.sf$geometry,
-                crs = st_crs( states))
+states <- USAboundaries::us_states() %>% st_transform(crs = crs( pp_exp_coal.r))
 
 # plot the exposure                
 ggplot( ) +
