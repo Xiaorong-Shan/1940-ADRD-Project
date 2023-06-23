@@ -48,11 +48,12 @@ raster1940_brick <-
 #dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0035_shapefile_tl2000_us_tract_1940"
 dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0001_shapefile_tl2008_us_county_1940"
 
-#This shp file has lots of missing data
+##This shp file has lots of missing data
 #roadiness_county <-
 #    st_read( file.path( dir.in, 'US_tractcounty_1940.shp'))
  
-#this shp file has the complete whole US cencus   
+#this shp file has the complete whole US cencus
+# you can find all the census tract data in https://www.nhgis.org/
 roadiness_county <-
     st_read( file.path( dir.in, 'US_county_1940_conflated.shp'))
 
