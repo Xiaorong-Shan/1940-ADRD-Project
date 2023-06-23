@@ -23,7 +23,7 @@ for (i in seq_along(files)){
 
 combine_fst <- do.call(rbind, df_list)
 
-write.fst(combine_fst, "/projects/HAQ_LAB/xshan2/disperseR_Linux/main/output/hyads/pp_exp_1951_com.fst")
+# write.fst(combine_fst, "/projects/HAQ_LAB/xshan2/disperseR_Linux/main/output/hyads/pp_exp_1951_com.fst")
 
 #extract the exposure you want to plot
 pp_exp_coal <- combine_fst[ ,c('x', 'y', 'exp_coal')]
@@ -49,11 +49,11 @@ ggplot( ) +
  # add the disperser grid
   geom_sf( data = pp_exp_coal.sf,
            aes( fill = exp_coal, geometry = geometry),
-           alpha = .75, color = NA) +
+           color = NA) +
   # add state coundaries
   geom_sf( data = states,
            aes( geometry = geometry),
-           alpha = .5, color = 'grey50',
+           fill = NA, color = 'grey50',
            inherit.aes = FALSE) +
   # change the fill & color scale
   scale_fill_viridis( limits = c( 0, 60), oob = scales::squish) +
