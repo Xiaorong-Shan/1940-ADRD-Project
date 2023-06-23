@@ -45,10 +45,16 @@ raster1940_brick <-
   brick( file_dims)
   
 #read the county shp file
-dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0035_shapefile_tl2000_us_tract_1940"
+#dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0035_shapefile_tl2000_us_tract_1940"
+dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0001_shapefile_tl2008_us_county_1940"
 
+#This shp file has lots of missing data
+#roadiness_county <-
+#    st_read( file.path( dir.in, 'US_tractcounty_1940.shp'))
+ 
+#this shp file has the complete whole US cencus   
 roadiness_county <-
-    st_read( file.path( dir.in, 'US_tractcounty_1940.shp'))
+    st_read( file.path( dir.in, 'US_county_1940_conflated.shp'))
 
 roadiness.trans.county <- st_transform(roadiness_county,
                                   crs = crs(p4s))
@@ -192,7 +198,7 @@ ggplot( ) +
          axis.text = element_blank(),
          strip.text = element_text( size = 20))
 
-
+ggsave("/scratch/xshan2/R_Code/Roadiness/pp_exp.pdf")
 
 
 
