@@ -21,7 +21,7 @@ p4s <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=
 p4string <- p4s
 
 #resolution
-res.link. <- 12000
+res.link. <- 36000
 
 #read the input unit file
 unit.facility <- read.csv("/scratch/xshan2/R_Code/disperseR/generator1940_gen.csv")                    
