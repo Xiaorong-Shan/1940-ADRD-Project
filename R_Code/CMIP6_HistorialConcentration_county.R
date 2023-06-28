@@ -211,7 +211,55 @@ ggplot( ) +
 
 ggsave("/scratch/xshan2/R_Code/Roadiness/CMIP6_11model_con.pdf")
 
+## take mean and standard deviation, convert to sf
 
+cmip6_con.dt <- subset(CMIP6.Con.dt, select = -c(geometry) )
+
+#calculate the sd and mean
+cmip6_con.dt <- transform(cmip6_con.dt, sd=apply(cmip6_con.dt, 1, sd, na.rm=TRUE))
+cmip6_con.dt <- transform(cmip6_con.dt, mean=apply(cmip6_con.dt, 1, mean, na.rm=TRUE))
+
+#create a data table for mean and sd
+cmip6_mean_sd.dt<-data.frame(matrix(ncol=3,nrow=nrow(CMIP6.Con.dt)))
+colnames(cmip6_mean_sd.dt)<-c('geometry','mean','sd')
+
+cmip6_mean_sd.dt$geometry <- CMIP6.Con.dt$geometry
+cmip6_mean_sd.dt$mean <- cmip6_con.dt$mean
+cmip6_mean_sd.dt$sd <- cmip6_con.dt$sd
+
+#transpose the table
+cmip6_mean_sd.m  <-
+    as.data.table(cmip6_mean_sd.dt ) %>%
+    melt( id.vars = 'geometry',
+          variable.name = 'value',
+          value.name = 'PM2.5_con')
+
+# plot the PM2.5 concentration for 11 models               
+ggplot( ) +
+  # add state coundaries
+  geom_sf( data = states,
+           aes( geometry = geometry),
+           color = 'grey50',
+           inherit.aes = FALSE) +
+ # add the disperser grid
+  geom_sf( data = cmip6_mean_sd.m,
+           aes( fill =  PM2.5_con, geometry = geometry),
+           color = NA) +
+  # change the fill & color scale
+  scale_fill_viridis( limits = c( 0, 10), oob = scales::squish) +
+  scale_color_viridis( limits = c( 0, 10), oob = scales::squish) +
+  facet_wrap( . ~ value, ncol = 3) +
+  # be sure to show 0 in the color scales
+  expand_limits( fill = 0, color = 0) +
+  # set boundaries over mainland of US
+  coord_sf( xlim=c(-3000000, 2500000),ylim=c(-2000000,1500000)) +
+  # set thematic elements
+  theme_minimal() +
+  theme( axis.title = element_text( size = 20),
+         axis.text = element_blank(),
+         strip.text = element_text( size = 20))
+
+ggsave("/scratch/xshan2/R_Code/Roadiness/CMIP6_mean_sd_con.pdf")
 
 
 
