@@ -171,11 +171,20 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
                 Con_UKESM1.0.LL = Con_UKESM1.0.LL[,1])
                 
 #st_write(concentration.final, "/projects/HAQ_LAB/xshan2/R_Code/Exposure_products/county_historical_CIMP6/county_historical_CIMP6.shp")
+#subset the county name in data table
+CMIP6.Con.dt <- subset(i_link.dt, select = -c(NHGISNAM) )
+
+#transpose the table
+CMIP6.Con.m  <-
+    as.data.table(CMIP6.Con.dt ) %>%
+    melt( id.vars = 'geometry',
+          variable.name = 'con_model',
+          value.name = 'PM2.5_con')
 
 # download some US data
 states <- USAboundaries::us_states() %>% st_transform(crs = p4s)
 
-# plot the exposure                
+# plot the PM2.5 concentration for 11 models               
 ggplot( ) +
   # add state coundaries
   geom_sf( data = states,
@@ -183,12 +192,13 @@ ggplot( ) +
            color = 'grey50',
            inherit.aes = FALSE) +
  # add the disperser grid
-  geom_sf( data = i_link.dt,
-           aes( fill = Con_CNRM.ESM2.1, geometry = geometry),
+  geom_sf( data = CMIP6.Con.m,
+           aes( fill =  PM2.5_con, geometry = geometry),
            color = NA) +
   # change the fill & color scale
   scale_fill_viridis( limits = c( 0, 10), oob = scales::squish) +
   scale_color_viridis( limits = c( 0, 10), oob = scales::squish) +
+  facet_wrap( . ~ con_model, ncol = 3) +
   # be sure to show 0 in the color scales
   expand_limits( fill = 0, color = 0) +
   # set boundaries over mainland of US
@@ -199,8 +209,7 @@ ggplot( ) +
          axis.text = element_blank(),
          strip.text = element_text( size = 20))
 
-ggsave("/scratch/xshan2/R_Code/Roadiness/pp_exp.pdf")
-
+ggsave("/scratch/xshan2/R_Code/Roadiness/CMIP6_11model_con.pdf")
 
 
 
