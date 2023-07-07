@@ -29,6 +29,9 @@ combine_fst <- do.call(rbind, df_list)
 
 total_exposure.dt<- subset(combine_fst, select = -c(N) )
 
+#sum the exposure by same x and y
+total_exposure.sum <- aggregate(.~x+y,data=total_exposure.dt,FUN=sum)
+
 # create raster object
 total_exposure.r <- rasterFromXYZ( total_exposure.dt,
                                  crs = p4s)
@@ -49,13 +52,12 @@ roadiness.trans.county <- st_transform(roadiness_county,
 
 roadiness.trans.county <- na.omit(roadiness.trans.county)
 
-roadiness.trans.county <- roadiness.trans.county[, c("NHGISNAM","geometry")] #only keep county name and geometry
-
-countyname <- unique(roadiness.trans.county$NHGISNAM)
+#keep the state & county name and geometry info
+geo_county <- roadiness.trans.county[, c("NHGISNAM","geometry", "STATENAM")]
 
 coal_county <-
     raster::extract( total_exposure.r$exp_coal, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -63,7 +65,7 @@ coal_county <-
 
 gas_county <-
     raster::extract( total_exposure.r$exp_gas, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -71,7 +73,7 @@ gas_county <-
 
 petroleum_county <-
     raster::extract( total_exposure.r$exp_petroleum, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -79,30 +81,27 @@ petroleum_county <-
 
 renewable_county <-
     raster::extract( total_exposure.r$exp_renewable, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
                      exact = FALSE)
   
  i_link.dt <- 
-    data.table( as.data.table( roadiness.trans.county),
+    data.table( as.data.table( geo_county),
                 coal= coal_county[,1],
                 gas = gas_county[,1],
                 petroleum = petroleum_county[,1],
                 renewable= renewable_county[,1])
 
-pp_exposure.dt <- subset(i_link.dt, select = -c(NHGISNAM) )
-
-#transpose the table
 pp_exposure.m  <-
-    as.data.table(pp_exposure.dt ) %>%
-    melt( id.vars = 'geometry',
+    as.data.table( i_link.dt ) %>%
+    melt( id.vars = c('geometry', 'NHGISNAM', 'STATENAM'),
           variable.name = 'fuel_type',
           value.name = 'hyads_exp')
 
 # download some US data
-states <- USAboundaries::us_states() %>% st_transform(crs = crs( total_exposure.r))
+states <- USAboundaries::us_states() %>% st_transform(crs = crs( p4s))
 
 # plot the PM2.5 concentration for 11 models               
 ggplot( ) +
@@ -116,9 +115,15 @@ ggplot( ) +
            aes( fill =  hyads_exp, geometry = geometry),
            color = NA) +
   # change the fill & color scale
-  scale_fill_viridis( limits = c( 0, 10), oob = scales::squish) +
-  scale_color_viridis( limits = c( 0, 10), oob = scales::squish) +
-  facet_wrap( . ~ fuel_type, ncol = 3) +
+  scale_fill_viridis( limits = c( 0, 200000), 
+                     breaks = c( 0, 100000, 200000),
+                     labels = c( '0.0', '100000', '200000'),
+                     oob = scales::squish) +
+  scale_color_viridis( limits = c( 0, 200000),
+                     breaks = c( 0, 100000, 200000),
+                     labels = c( '0.0', '100000', '200000'),
+                      oob = scales::squish) +
+  facet_wrap( . ~ fuel_type, ncol = 2) +
   # be sure to show 0 in the color scales
   expand_limits( fill = 0, color = 0) +
   # set boundaries over mainland of US
