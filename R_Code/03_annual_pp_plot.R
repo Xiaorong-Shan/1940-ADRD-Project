@@ -169,6 +169,61 @@ ggplot( ) +
 
 ggsave('/scratch/xshan2/R_Code/disperseR/pp_coal_1951_fuel.pdf')
 
+###############################################################
+#if we want to plot the exposure with its facility location
+###############################################################
+#fuel type include Coal Gas Petroleum Renewable
+petro_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="petroleum",]
+#coal_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="pcoal",]
+#gas_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="gas",]
+#renewable_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="renewable",]
+
+petro_location <- facility.sf[facility.sf$fuel_type=="Petroleum",]
+#coal_location <- facility.sf[facility.sf$fuel_type=="Coal",]
+#gas_location <- facility.sf[facility.sf$fuel_type=="Gas",]
+#renew_location <- facility.sf[facility.sf$fuel_type=="Renewable",]
+
+# plot the PM2.5 concentration for 11 models               
+ggplot( ) +
+  # add state coundaries
+  geom_sf( data = states,
+           aes( geometry = geometry),
+           color = 'grey50',
+           inherit.aes = FALSE) +
+  # add the disperser grid
+  geom_sf( data = petro_exp,
+           aes( fill =  hyads_exp, geometry = geometry),
+           color = NA) +
+  geom_sf( data = petro_location,
+           inherit.aes = FALSE,
+           color = 'red', size = petro_location$resecale_capacity)+
+  # change the fill & color scale
+  scale_fill_viridis( limits = c( 0, 200000), 
+                      breaks = c( 0, 100000, 200000),
+                      labels = c( '0.0', '100000', '200000'),
+                      oob = scales::squish) +
+  scale_color_viridis( limits = c( 0, 200000),
+                       breaks = c( 0, 100000, 200000),
+                       labels = c( '0.0', '100000', '200000'),
+                       oob = scales::squish) +
+  #facet_wrap( . ~ fuel_type, ncol = 2) +
+  # be sure to show 0 in the color scales
+  expand_limits( fill = 0, color = 0) +
+  # set boundaries over mainland of US
+  coord_sf( xlim=c(-3000000, 2500000),ylim=c(-2000000,1500000)) +
+  # set thematic elements
+  # ggtitle("Mean & SD of 11 models")  + 
+  theme(plot.title = element_text(size = 20, face = "bold")) + 
+  theme(rect = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = 'bottom',
+        strip.text = element_text( size = 20))  
+
+
+
+
 ##extract the exposure you want to plot
 #pp_exp_coal <- combine_fst[ ,c('x', 'y', 'exp_coal')]
 
@@ -186,26 +241,3 @@ ggsave('/scratch/xshan2/R_Code/disperseR/pp_coal_1951_fuel.pdf')
 #pp_exp_coal.sf <- st_as_sf( pp_exp_coal.sp)
 
 
-# plot the exposure                
-#ggplot( ) +
- # add the disperser grid
-#  geom_sf( data = pp_exp_coal.sf,
-#           aes( fill = exp_coal, geometry = geometry),
-#           color = NA) +
-  # add state coundaries
-#  geom_sf( data = states,
-#          aes( geometry = geometry),
-#            fill = NA, color = 'grey50',
-#           inherit.aes = FALSE) +
-  # change the fill & color scale
-#  scale_fill_viridis( limits = c( 0, 60), oob = scales::squish) +
-#  scale_color_viridis( limits = c( 0, 60), oob = scales::squish) +
-  # be sure to show 0 in the color scales
-#  expand_limits( fill = 0, color = 0) +
-  # set boundaries over mainland of US
-#  coord_sf( xlim=c(-3000000, 2500000),ylim=c(-2000000,1500000)) +
-  # set thematic elements
-#  theme_minimal() +
-#  theme( axis.title = element_text( size = 20),
-#         axis.text = element_blank(),
-#         strip.text = element_text( size = 20))
