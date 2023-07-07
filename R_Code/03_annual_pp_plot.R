@@ -174,7 +174,7 @@ ggsave('/scratch/xshan2/R_Code/disperseR/pp_coal_1951_fuel.pdf')
 ###############################################################
 #fuel type include Coal Gas Petroleum Renewable
 petro_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="petroleum",]
-#coal_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="pcoal",]
+#coal_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="coal",]
 #gas_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="gas",]
 #renewable_exp <- pp_exposure.m[pp_exposure.m$fuel_type=="renewable",]
 
