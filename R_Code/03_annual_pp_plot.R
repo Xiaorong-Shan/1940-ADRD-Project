@@ -100,10 +100,42 @@ pp_exposure.m  <-
           variable.name = 'fuel_type',
           value.name = 'hyads_exp')
 
+###############################################################
+#read the facility locations and plot them on the map
+###############################################################
+
+unit.facility.c <- read.csv("/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/facility_location.csv")
+
+unit.facility.c <- subset(unit.facility.c, select = -c(X) )
+#change the datatable format
+unit.facility.m  <-
+    as.data.table( unit.facility.c) %>%
+    melt( id.vars = c('lon', 'lat', 'Height', 'year', 'uID', 'ID'),
+          variable.name = 'fuel_type',
+          value.name = 'capacity')
+
+unit.facility.m <- unit.facility.m[unit.facility.m$capacity>0,]
+
+#turn the lon and lat into geometry point
+facility.sf <- st_as_sf(unit.facility.m, coords = c("lon","lat"),
+                        crs='+init=epsg:4326 +proj=longlat +ellps=WGS84
+                       +datum=WGS84 +no_defs +towgs84=0,0,0',
+                        agr = "constant") %>%
+   st_transform( st_crs( p4s))
+
+#rescale to control the points' size
+point.rescale <- rescale(facility.sf$capacity, to = c(1, 5))
+
+facility.sf$resecale_capacity <- point.rescale
+
+###############################################################
 # download some US data
+###############################################################
 states <- USAboundaries::us_states() %>% st_transform(crs = crs( p4s))
 
-# plot the PM2.5 concentration for 11 models               
+###############################################################
+# plot the hyads exposure for different fuel type               
+###############################################################
 ggplot( ) +
   # add state coundaries
   geom_sf( data = states,
