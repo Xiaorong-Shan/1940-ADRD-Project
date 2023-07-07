@@ -132,6 +132,7 @@ ggplot( ) +
   theme_minimal() +
   theme( axis.title = element_text( size = 20),
          axis.text = element_blank(),
+         legend.position = 'bottom',
          strip.text = element_text( size = 20))
 
 ggsave('/scratch/xshan2/R_Code/disperseR/pp_coal_1951_fuel.pdf')
