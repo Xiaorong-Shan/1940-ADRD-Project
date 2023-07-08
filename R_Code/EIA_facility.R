@@ -214,6 +214,50 @@ save( exp_inverse_dist,
       exp_inverse_dist_sum,
       file =  '~/Dropbox/GeorgeMason/Grants/2020/NIH_1940s_PP/prelim_analysis/inv_dist_facilities.RData')
 
+
+##############################################################################################
+###plot the petro station and its exposure here
+##############################################################################################
+petro_idw <- exp_inverse_dist_sum[exp_inverse_dist_sum$FUEL == "Petroleum",]
+coal_idw <- exp_inverse_dist_sum[exp_inverse_dist_sum$FUEL == "Coal",]
+gas_idw <- exp_inverse_dist_sum[exp_inverse_dist_sum$FUEL == "Gas",]
+renew_idw <- exp_inverse_dist_sum[exp_inverse_dist_sum$FUEL == "Renewable",]
+
+petro_location <- generator1940_gen_use[generator1940_gen_use$variable == "Petroleum",]
+coal_location <- generator1940_gen_use[generator1940_gen_use$variable == "Coal",]
+gas_location <- generator1940_gen_use[generator1940_gen_use$variable == "Gas",]
+renew_location <- generator1940_gen_use[generator1940_gen_use$variable == "Renewable",]
+
+petro.station <- petro_location[, c("centroid_geo")]
+coal.station <- coal_location[, c("centroid_geo")]
+gas.station <- gas_location[, c("centroid_geo")]
+renew.station <- renew_location[, c("centroid_geo")]
+
+colnames(petro.station) <- "geometry"
+colnames(coal.station) <- "geometry"
+colnames(gas.station) <- "geometry"
+colnames(renew.station) <- "geometry"
+
+petro.station.t <- st_as_sf(petro.station)  %>% st_transform(crs = st_crs(petro_idw$geometry))
+coal.station.t <- st_as_sf(coal.station)  %>% st_transform(crs = st_crs(coal_idw$geometry))
+gas.station.t <- st_as_sf(gas.station)  %>% st_transform(crs = st_crs(gas_idw$geometry))
+renew.station.t <- st_as_sf(renew.station)  %>% st_transform(crs = st_crs(renew_idw$geometry))
+
+ggplot( ) +
+  # add the disperser grid
+  geom_sf( data = petro_idw,
+           aes( geometry = geometry,
+                fill = exposure)) +
+  geom_sf( data = petro.station.t,
+           aes(geometry = geometry),
+           color = 'blue', size = 0.5)+
+scale_fill_gradient( low = 'white', high = 'red',
+                     limits = c( 0, 0.002), 
+                     breaks = c( 0, 0.001, 0.002),
+                     labels = c( '0.0', '0.001', '0.002')) + 
+  theme(legend.position = 'bottom')
+
+
 ## ============================================== ##
 ## check out CMIP6 gridded emissions
 ## ============================================== ##
