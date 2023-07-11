@@ -278,9 +278,10 @@ sum( values( emiss[['X1940.01.16']]))
 
 ## ============================================================================= ##
 ##save the file, IDW in csv and geometry in shp, then find way to combine thems
+## ============================================================================= ##
+
 idw_pp <- exp_inverse_dist_sum[, -c("geometry")]
 wrtite.csv(idw_pp, "./idw_pp.csv")
-## ============================================================================= ##
 
 #geometry info
 geo_sf <- counties.sf[, c("geoid", "geometry")]
