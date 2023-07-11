@@ -257,7 +257,16 @@ ggplot( ) +
 
 ggsave("/scratch/xshan2/R_Code/Roadiness/CMIP6_mean_sd_con.pdf")
 
+## ============================================================================= ##
+##save the file, IDW in csv and geometry in shp, then find way to combine thems
+## ============================================================================= ##
+cmip6_county_11 <- CMIP6.Con.m[, -c("geometry")]
+wrtite.csv(cmip6_county_11, "/scratch/xshan2/R_Code/CMIP6/cmip6_councentration_county_11_models.csv")
 
+cmip6_county_geo <- 
+  cmip6_county_11 %>%
+  merge( roadiness.trans.county, by = c('NHGISNAM', 'STATENAM'))
+  
 
 
 
