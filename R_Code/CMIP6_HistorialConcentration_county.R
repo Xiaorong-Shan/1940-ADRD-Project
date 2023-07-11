@@ -62,14 +62,12 @@ roadiness.trans.county <- st_transform(roadiness_county,
 
 roadiness.trans.county <- na.omit(roadiness.trans.county)
 
-roadiness.trans.county <- roadiness.trans.county[, c("NHGISNAM","geometry")] #only keep county name and geometry
-
-countyname <- unique(roadiness.trans.county$NHGISNAM)
+geo_county <- roadiness.trans.county[, c("NHGISNAM","geometry", "STATENAM")] #only keep county name and geometry
 
 #extract the PM2.5 concentration for each model (11 in total)
   Con_BCC.ESM1 <- 
     raster::extract( raster1940_brick$BCC.ESM1, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -77,7 +75,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_CESM2.WACCM <- 
     raster::extract( raster1940_brick$CESM2.WACCM, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -85,7 +83,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
 
   Con_CNRM.ESM2.1 <- 
     raster::extract( raster1940_brick$CNRM.ESM2.1, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -93,7 +91,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_GFDL.ESM4 <- 
     raster::extract( raster1940_brick$GFDL.ESM4, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -101,7 +99,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_GISS.E2.1.G <- 
     raster::extract( raster1940_brick$GISS.E2.1.G, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -109,7 +107,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_HadGEM3.GC31.LL <- 
     raster::extract( raster1940_brick$HadGEM3.GC31.LL, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -117,7 +115,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
    
   Con_MIROC.ES2L <- 
     raster::extract( raster1940_brick$MIROC.ES2L, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -125,7 +123,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_MPI.ESM.1.2.HAM <- 
     raster::extract( raster1940_brick$MPI.ESM.1.2.HAM, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -133,7 +131,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_MRI.ESM2.0 <- 
     raster::extract( raster1940_brick$MRI.ESM2.0, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -141,7 +139,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_NorESM2.LM <- 
     raster::extract( raster1940_brick$NorESM2.LM, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -149,7 +147,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
   Con_UKESM1.0.LL <- 
     raster::extract( raster1940_brick$UKESM1.0.LL, 
-                     roadiness.trans.county,
+                     geo_county,
                      fun = mean,
                      na.rm= TRUE,
                      weights = TRUE,
@@ -157,7 +155,7 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
   
 # create a data table of the results
   i_link.dt <- 
-    data.table( as.data.table( roadiness.trans.county),
+    data.table( as.data.table( geo_county),
                 Con_BCC.ESM1= Con_BCC.ESM1[,1],
                 Con_CESM2.WACCM = Con_CESM2.WACCM[,1],
                 Con_CNRM.ESM2.1 = Con_CNRM.ESM2.1[,1],
@@ -170,14 +168,12 @@ countyname <- unique(roadiness.trans.county$NHGISNAM)
                 Con_NorESM2.LM = Con_NorESM2.LM[,1],
                 Con_UKESM1.0.LL = Con_UKESM1.0.LL[,1])
                 
-#st_write(concentration.final, "/projects/HAQ_LAB/xshan2/R_Code/Exposure_products/county_historical_CIMP6/county_historical_CIMP6.shp")
-#subset the county name in data table
-CMIP6.Con.dt <- subset(i_link.dt, select = -c(NHGISNAM) )
+#st_write(i_link.dt, "/projects/HAQ_LAB/xshan2/R_Code/Exposure_products/county_historical_CIMP6/county_historical_CIMP6.shp")
 
 #transpose the table
 CMIP6.Con.m  <-
-    as.data.table(CMIP6.Con.dt ) %>%
-    melt( id.vars = 'geometry',
+    as.data.table(i_link.dt ) %>%
+    melt( id.vars = c('geometry', 'NHGISNAM', 'STATENAM'),
           variable.name = 'con_model',
           value.name = 'PM2.5_con')
 
