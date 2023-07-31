@@ -55,7 +55,7 @@ colnames(unit.facility.c)[1] <- "Longitude"
 colnames(unit.facility.c)[2] <- "Latitude"
 
 input_refs <- disperseR::define_inputs(units = unit.facility.c,
-                                       startday = '1951-01-11',
+                                       startday = '1951-01-01',
                                        endday = '1951-12-31',
                                        start.hours =  12,
                                        duration = 24 * 7)
