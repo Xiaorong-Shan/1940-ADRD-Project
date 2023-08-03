@@ -170,6 +170,48 @@ ggplot( ) +
 ggsave('/scratch/xshan2/R_Code/disperseR/pp_coal_1951_fuel.pdf')
 
 ###############################################################
+# normalize the hyads exposure             
+###############################################################
+#normalize
+MEAN <- mean(pp_exposure.m$hyads_exp)
+
+SD <- sd(pp_exposure.m$hyads_exp)
+
+pp_exposure.m$normalize <- (pp_exposure.m$hyads_exp - MEAN)/SD
+
+# plot the PM2.5 concentration for 11 models               
+ggplot( ) +
+  # add state coundaries
+  geom_sf( data = states,
+           aes( geometry = geometry)) +
+ # add the disperser grid
+  geom_sf( data = pp_exposure.m,
+           aes( fill =normalize, geometry = geometry)) +
+  # change the fill & color scale
+  scale_fill_gradient( limits = c( -1, 1), 
+                     breaks = c( -1, 0, 1),
+                     labels = c( '-1', '0', '1'),
+                     oob = scales::squish) +
+  scale_color_viridis( limits = c( -1, 1), 
+                     breaks = c( -1, 0, 1),
+                     labels = c( '-1', '0', '1'),
+                     oob = scales::squish) +
+  facet_wrap( . ~ fuel_type, ncol = 2) +
+  # be sure to show 0 in the color scales
+  expand_limits( fill = 0, color = 0) +
+  # set boundaries over mainland of US
+  coord_sf( xlim=c(-3000000, 2500000),ylim=c(-2000000,1500000)) +
+  # set thematic elements
+  # ggtitle("Mean & SD of 11 models")  + 
+  theme(plot.title = element_text(size = 20, face = "bold")) + 
+  theme(rect = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = 'bottom',
+        strip.text = element_text( size = 20))
+
+###############################################################
 #if we want to plot the exposure with its facility location
 ###############################################################
 #fuel type include Coal Gas Petroleum Renewable
