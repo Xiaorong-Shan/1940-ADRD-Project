@@ -257,7 +257,27 @@ scale_fill_gradient( low = 'white', high = 'red',
                      labels = c( '0.0', '0.001', '0.002')) + 
   theme(legend.position = 'bottom')
 
-
+#another style without background
+ggplot( ) +
+  # add the disperser grid
+  geom_sf( data = gas_idw,
+           aes( geometry = geometry,
+                fill = exposure)) +
+  geom_sf( data = gas.station.t,
+           aes(geometry = geometry),
+           color = 'blue', size = 0.5)+
+  scale_fill_gradient( low = 'white', high = 'red',
+                       limits = c( 0, 0.002), 
+                       breaks = c( 0, 0.001, 0.002),
+                       labels = c( '0.0', '0.001', '0.002'),
+                       oob = scales::squish) + 
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        rect = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = 'bottom',
+        strip.text = element_text( size = 20))
 ## ============================================== ##
 ## check out CMIP6 gridded emissions
 ## ============================================== ##
