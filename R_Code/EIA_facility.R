@@ -193,12 +193,20 @@ setnames( exp_inverse_dist,
 
 counties.sf <- counties.sf[,-9] #remove duplicate name
 
-# plot exposure from each
+# sum the IDW
 exp_inverse_dist_sum <- 
   exp_inverse_dist[, .( exposure = sum( exp_inv_dist)),
                    by = .( FUEL, geoid)] %>%
   merge( counties.sf, by = 'geoid')
 
+#normalize
+MEAN <- mean(exp_inverse_dist_sum$exposure)
+
+SD <- sd(exp_inverse_dist_sum$exposure)
+
+exp_inverse_dist_sum$normalize <- (exp_inverse_dist_sum$exposure - MEAN)/SD
+
+# plot exposure from each
 exp_inverse_dist_f <- 
   ggplot( exp_inverse_dist_sum,
           aes( geometry = geometry,
@@ -264,14 +272,14 @@ ggplot( ) +
   # add the disperser grid
   geom_sf( data = gas_idw,
            aes( geometry = geometry,
-                fill = exposure)) +
+                fill = normalize)) +
   geom_sf( data = gas.station.t,
-           aes(geometry = geometry),
            color = 'blue', size = 0.5)+
-  scale_fill_gradient( low = 'white', high = 'red',
-                       limits = c( 0, 0.002), 
-                       breaks = c( 0, 0.001, 0.002),
-                       labels = c( '0.0', '0.001', '0.002'),
+  scale_fill_gradient( name = "IDW exposure",
+                       low = 'white', high = 'red',
+                       limits = c( -1, 10), 
+                       breaks = c( -1, 5, 10),
+                       labels = c( '-1', '5', '10'),
                        oob = scales::squish) + 
   theme(plot.title = element_text(size = 20, face = "bold"),
         rect = element_blank(),
