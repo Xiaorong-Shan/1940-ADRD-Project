@@ -188,13 +188,13 @@ ggplot( ) +
   geom_sf( data = pp_exposure.m,
            aes( fill =normalize, geometry = geometry)) +
   # change the fill & color scale
-  scale_fill_gradient( limits = c( -1, 1), 
-                     breaks = c( -1, 0, 1),
-                     labels = c( '-1', '0', '1'),
+  scale_fill_gradient( limits = c( -1, 10), 
+                     breaks = c( -1, 5, 10),
+                     labels = c( '-1', '5', '10'),
                      oob = scales::squish) +
-  scale_color_viridis( limits = c( -1, 1), 
-                     breaks = c( -1, 0, 1),
-                     labels = c( '-1', '0', '1'),
+  scale_color_viridis( limits = c( -1, 10), 
+                     breaks = c( -1, 5, 10),
+                     labels = c( '-1', '5', '10'),
                      oob = scales::squish) +
   facet_wrap( . ~ fuel_type, ncol = 2) +
   # be sure to show 0 in the color scales
