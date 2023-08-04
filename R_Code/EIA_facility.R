@@ -30,9 +30,9 @@ library( sf)
 #   scale_color_viridis( option = 'A',
 #                        end = .8)
 
-generator2010ret <- readxl::read_xls( 'c:/Users/xshan2/OneDrive - George Mason University - O365 Production/GMU_PhD/01_Research/02_2019fall_ADRD/prelim_analysis/PowerPlant/GeneratorsY2010.xls',
+generator2010ret <- readxl::read_xls( '/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/GeneratorsY2010.xls',
                                       sheet = 3) %>% data.table
-generator2010act <- readxl::read_xls( 'c:/Users/xshan2/OneDrive - George Mason University - O365 Production/GMU_PhD/01_Research/02_2019fall_ADRD/prelim_analysis/PowerPlant/GeneratorsY2010.xls',
+generator2010act <- readxl::read_xls( '/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/GeneratorsY2010.xls',
                                       sheet = 1) %>% data.table
 
 # limit to facilities operating by 1940 and not retired by 1940
