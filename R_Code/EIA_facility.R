@@ -129,7 +129,9 @@ length( unique( generator2040_gas$COUNTY))
 ## create inverse distance weighted metrics
 ## ============================================== ##
 # define a coordinate reference system
-p4s <- "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=40 +lon_0=-97 +a=6370000 +b=6370000"
+#p4s <- "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=40 +lon_0=-97 +a=6370000 +b=6370000"
+p4s <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m"
+
 
 generator1940_gen <- generator1940[, lapply( .SD, sum, na.rm = T),
                                    .SDcols = fueltype_names, 
