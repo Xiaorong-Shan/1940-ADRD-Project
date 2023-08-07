@@ -182,16 +182,20 @@ pp_exposure.m$normalize <- (pp_exposure.m$hyads_exp - MEAN)/SD
 # plot the PM2.5 concentration for 11 models               
 ggplot( ) +
   # add state coundaries
-  geom_sf( data = states,
-           aes( geometry = geometry)) +
  # add the disperser grid
   geom_sf( data = pp_exposure.m,
-           aes( fill =normalize, geometry = geometry)) +
+           aes( fill =  normalize, geometry = geometry),
+           color = NA) +
   # change the fill & color scale
-  scale_fill_gradient( name = "normalize hyads exposure",
-                     limits = c( -1, 10), 
-                     breaks = c( -1, 5, 10),
-                     labels = c( '-1', '5', '10'),
+  scale_fill_viridis(  name = "normalize hyads exposure",
+                     limits = c( -1, 6), 
+                     breaks = c( -1, 3, 6),
+                     labels = c( '-1', '3', '6'),
+                     oob = scales::squish) +
+  scale_color_viridis(  name = "normalize hyads exposure",
+                     limits = c( -1, 6), 
+                     breaks = c( -1, 3, 6),
+                     labels = c( '-1', '3', '6'),
                      oob = scales::squish) +
   facet_wrap( . ~ fuel_type, ncol = 2) +
   # be sure to show 0 in the color scales
@@ -206,7 +210,7 @@ ggplot( ) +
         axis.text.y = element_blank(),
         axis.ticks = element_blank(),
         legend.position = 'bottom',
-        strip.text = element_text( size = 20))
+        strip.text = element_text( size = 20)) 
 
 ###############################################################
 #if we want to plot the exposure with its facility location
