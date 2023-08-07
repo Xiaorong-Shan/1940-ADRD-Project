@@ -229,29 +229,27 @@ petro_location <- facility.sf[facility.sf$fuel_type=="Petroleum",]
 # plot the PM2.5 concentration for 11 models               
 ggplot( ) +
   # add state coundaries
-  geom_sf( data = states,
-           aes( geometry = geometry),
-           color = 'grey50',
-           inherit.aes = FALSE) +
   # add the disperser grid
   geom_sf( data = petro_exp,
-           aes( fill =  hyads_exp, geometry = geometry),
+           aes( fill =  normalize, geometry = geometry),
            color = NA) +
-  geom_sf( data = petro_location,
-           inherit.aes = FALSE,
-           color = 'red', size = petro_location$resecale_capacity)+
   # change the fill & color scale
-  scale_fill_viridis( limits = c( 0, 200000), 
-                      breaks = c( 0, 100000, 200000),
-                      labels = c( '0.0', '100000', '200000'),
-                      oob = scales::squish) +
-  scale_color_viridis( limits = c( 0, 200000),
-                       breaks = c( 0, 100000, 200000),
-                       labels = c( '0.0', '100000', '200000'),
-                       oob = scales::squish) +
+  scale_fill_viridis(  name = "normalize hyads exposure",
+                     limits = c( -1, 1), 
+                     breaks = c( -1, 0, 1),
+                     labels = c( '-1', '0', '1'),
+                     oob = scales::squish) +
+  scale_color_viridis(  name = "normalize hyads exposure",
+                     limits = c( -1, 1), 
+                     breaks = c( -1, 0, 1),
+                     labels = c( '-1', '0', '1'),
+                     oob = scales::squish) +
   #facet_wrap( . ~ fuel_type, ncol = 2) +
   # be sure to show 0 in the color scales
   expand_limits( fill = 0, color = 0) +
+  geom_sf( data = petro_location,
+           inherit.aes = FALSE,
+           color = 'red', size = petro_location$resecale_capacity)+
   # set boundaries over mainland of US
   coord_sf( xlim=c(-3000000, 2500000),ylim=c(-2000000,1500000)) +
   # set thematic elements
@@ -263,8 +261,6 @@ ggplot( ) +
         axis.ticks = element_blank(),
         legend.position = 'bottom',
         strip.text = element_text( size = 20))  
-
-
 
 
 ##extract the exposure you want to plot
