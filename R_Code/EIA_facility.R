@@ -216,6 +216,27 @@ exp_inverse_dist_f <-
   scale_fill_gradient( low = 'white', high = 'red') + 
   facet_wrap( . ~ FUEL)
 
+#plot the normalize
+ggplot( exp_inverse_dist_sum,
+          aes( geometry = geometry,
+               fill = normalize)) + 
+  # geom_sf( data = counties.sf, color = 'black', fill = 'white') + 
+  geom_sf( color = NA) + 
+  scale_fill_gradient( name = "IDW exposure",
+                      low = 'white', high = 'red',
+                       limits = c( -1, 1), 
+                       breaks = c( -1, 0, 1),
+                       labels = c( '-1', '0', '1'),
+                       oob = scales::squish) + 
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        rect = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = 'bottom',
+        strip.text = element_text( size = 20))+ 
+  facet_wrap( . ~ FUEL)
+
 ggsave( exp_inverse_dist_f,
         filename = '/Users/xshan2/OneDrive - George Mason University - O365 Production/GMU_PhD/01_Research/02_2019fall_ADRD/prelim_analysis/PowerPlant/exp_inverse_dist_facility_1940.png',
         width = 3.5*2, height = 2.25*2, scale = 1.2)
