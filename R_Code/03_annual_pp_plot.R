@@ -8,22 +8,22 @@ library(viridis)
 library(raster)
 
 #read all fst files together
-exp_dir <- "/projects/HAQ_LAB/xshan2/disperseR_Linux/main/output/hyads/1951" #from year 1951 to 1960
+#exp_dir <- "/projects/HAQ_LAB/xshan2/disperseR_Linux/main/output/hyads/1951" #from year 1951 to 1960
 
 p4s <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m"
 
-files <- list.files(exp_dir,
-                    pattern = '*.fst',
-                    full.names = TRUE) 
+#files <- list.files(exp_dir,
+#                    pattern = '*.fst',
+#                    full.names = TRUE) 
 
-df_list <- rep(list(NA), length(files))
+#df_list <- rep(list(NA), length(files))
 
-for (i in seq_along(files)){
-  df_list[[i]] <- fst::read_fst(files[i], as.data.table=T)
+#for (i in seq_along(files)){
+#  df_list[[i]] <- fst::read_fst(files[i], as.data.table=T)
+#
+#}
 
-}
-
-combine_fst <- do.call(rbind, df_list)
+#combine_fst <- do.call(rbind, df_list)
 
 #for summing from 1951 to 1960
 dirs <- as.character(1951:1960)
