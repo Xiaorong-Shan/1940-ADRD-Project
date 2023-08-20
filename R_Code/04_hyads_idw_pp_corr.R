@@ -12,8 +12,6 @@ pp_exposure.m <- st_read("/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/pp_hyads
 
 setDT(pp_exposure.m)
 
-# Convert the geometry column to a character representation
-pp_exposure.m[, geom_char := st_as_text(geometry)]
+#sum data by same NHGISNA and STATENA
+summed_data <- pp_exposure.m[, .(total_hyds_nr = sum(hyds_nr, na.rm = TRUE)), by = .(NHGISNA, STATENA)]
 
-# Sum the hyads_normalize values for each unique geometry
-summed_data <- pp_exposure.m[, .(total_hyads_normalize = sum(hyads_normalize, na.rm = TRUE)), by = .(geom_char)]
