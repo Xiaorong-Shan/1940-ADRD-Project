@@ -290,18 +290,18 @@ scale_fill_gradient( low = 'white', high = 'red',
 
 #another style without background
 ggplot( ) +
-  # add the disperser grid
-  geom_sf( data = gas_idw,
+  geom_sf( data = petro_idw,
            aes( geometry = geometry,
-                fill = normalize)) +
-  geom_sf( data = gas.station.t,
-           color = 'blue', size = 0.5)+
+                fill = idw_nrm), color=NA) +
   scale_fill_gradient( name = "IDW exposure",
-                       low = 'white', high = 'red',
-                       limits = c( -1, 10), 
-                       breaks = c( -1, 5, 10),
-                       labels = c( '-1', '5', '10'),
-                       oob = scales::squish) + 
+                       low = 'blue', high = 'red',
+                       limits = c( -1, 1),
+                       breaks = c( -1, 0, 1),
+                       labels = c( '-1', '0', '1'),
+                       oob = scales::squish) +
+  geom_sf( data = petro.station.t,
+           aes(geometry = geometry),
+           color = 'green', size = 0.5)+
   theme(plot.title = element_text(size = 20, face = "bold"),
         rect = element_blank(),
         axis.text.x = element_blank(),
