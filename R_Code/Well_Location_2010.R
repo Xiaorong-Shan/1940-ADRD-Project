@@ -83,7 +83,9 @@ fishnet.sf <-
 # define a receptor ID
 fishnet.sf$ID_recept <- 1:nrow( fishnet.sf)
 
-fishnet.r <- raster(xmn=-2274550, ymn=-1603146, xmx=2425450, ymx=1296854, res=4000, crs= p4s)
+#check the boundary for us mainland
+boundary <- st_bbox(tx.sf)
+fishnet.r <- raster(xmn=-2236898, ymn=-1695099, xmx=2126972, ymx=1322318, res=4000, crs= p4s)
 fishnet.r[] <- 0
 
 link_locations <- st_coordinates( link_locations.sf.trans)
@@ -155,10 +157,6 @@ inv_distancer <-
     
     return( out)
   }
-
-# N_array <- 100
-
-# N_list <- split( 1:nrow(well_num.sf), ceiling( seq_along( 1:nrow(well_num.sf))/ N_array))
 
 exp_inverse_dist <-
  lapply(
