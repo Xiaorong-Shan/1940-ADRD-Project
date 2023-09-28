@@ -83,7 +83,7 @@ roadiness_county <-
   st_read( file.path( dir.in, 'US_county_1940_conflated.shp'))
 
 roadiness.trans.county <- st_transform(roadiness_county,
-                                       crs = crs(p4s))
+                                       crs = st_crs(p4s))
 
 roadiness.trans.county <- na.omit(roadiness.trans.county)
 
