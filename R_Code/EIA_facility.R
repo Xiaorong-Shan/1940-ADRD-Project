@@ -73,6 +73,23 @@ generator1940_county.sf <- merge( generator1940_county,
                                   by.y = c( 'state_abbr', 'name'),
                                   all.y = T)
 
+#=============================================================================================#
+#or use county level
+#read the county shp file
+dir.in <- "/projects/HAQ_LAB/xshan2/R_Code/Roadiness/nhgis0001_shapefile_tl2008_us_county_1940"
+
+# you can find all the census tract data in https://www.nhgis.org/
+roadiness_county <-
+  st_read( file.path( dir.in, 'US_county_1940_conflated.shp'))
+
+roadiness.trans.county <- st_transform(roadiness_county,
+                                       crs = crs(p4s))
+
+roadiness.trans.county <- na.omit(roadiness.trans.county)
+
+roadiness.trans.county$state_abbr <- state.abb[match(roadiness.trans.county$STATENAM, state.name)]
+#=============================================================================================#
+
 # melt
 generator1940_county.sf.m <- melt( generator1940_county.sf,
                                    id.vars = c( 'STATE', 'COUNTY', 'geometry'),
