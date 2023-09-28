@@ -72,7 +72,18 @@ generator1940_county.sf <- merge( generator1940_county,
                                   by.x = c( 'STATE', 'COUNTY'),
                                   by.y = c( 'state_abbr', 'name'),
                                   all.y = T)
+generator2010_county[, COUNTY := tolower( COUNTY)]
+generator2010_county.sf <- merge( generator2010_county,
+                                  roadiness.trans.county[, c( 'state_abbr', 'NHGISNAM', 'geometry')], 
+                                  by.x = c( 'STATE', 'COUNTY'),
+                                  by.y = c( 'state_abbr', 'NHGISNAM'),
+                                  all.y = T)
 
+
+generator2010_county.sf.m <- melt( generator2010_county.sf,
+                                   id.vars = c( 'STATE', 'COUNTY', 'geometry'),
+                                   measure.vars = fueltype_names)
+generator2010_county.sf.m[is.na( value), value := 0]
 #=============================================================================================#
 #or use county level
 #read the county shp file
