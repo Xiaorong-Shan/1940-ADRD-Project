@@ -1,0 +1,293 @@
+library( data.table)
+library( raster)
+library( sf)
+library( magrittr)
+library( USAboundaries)
+library( data.table)
+library( ggplot2)
+library( viridis)
+library( ncdf4)
+library(dplyr)
+
+facility_info <- read.csv("C:/Users/xshan2/OneDrive - George Mason University - O365 Production/GMU_PhD/01_Research/02_2019fall_ADRD/prelim_analysis/PowerPlant/pp_input/ampd/facility-attributes-2010_CAMPD.csv")
+
+facility_emission <- read.csv("C:/Users/xshan2/OneDrive - George Mason University - O365 Production/GMU_PhD/01_Research/02_2019fall_ADRD/prelim_analysis/PowerPlant/pp_input/ampd/annual-emissions-unit-2010-AMPD.csv")
+
+common_columns <- intersect(names(facility_info), names(facility_emission))
+
+
+facility_info_emiss.all <- merge(facility_info, facility_emission, by = common_columns)
+
+
+facility_info_emiss.clean <- facility_info_emiss.all %>%
+  filter(!grepl("[a-zA-Z0-9]", SO2.Controls))
+
+# Subset for dates on or before 1940-12-31
+subset_before_1941 <- facility_info_emiss.clean %>%
+  filter(Commercial.Operation.Date <= as.Date("1940-12-31"))
+
+#=================================================================================================================================================================================
+# Gross load refers to the total amount of energy that is required to serve demand for a country or region throughout the day. 
+# Gross load peak is the electricity required at its highest level of the day, usually occurring in the late afternoon when consumers’ demand for energy increases. 
+#=================================================================================================================================================================================
+
+EF_calculate <- facility_info_emiss.clean[c("Primary.Fuel.Type", "SO2.Mass..short.tons.", "Gross.Load..MWh.", "Unit.Type")]
+
+#EF_calculate$Operating.Capacity <- EF_calculate$Gross.Load..MWh./ EF_calculate$Operating.Time.Count # Operating.Capacity unit (MW)
+
+# Removing rows where Gross.Load..MWh. equals 0
+EF_calculate <- EF_calculate %>%
+  filter(`Gross.Load..MWh.` != 0,
+         `SO2.Mass..short.tons.` != 0 )
+
+EF_calculate <- na.omit(EF_calculate)
+
+#=================================================================================================================================================================================
+#Fuel type
+#Coal: "Coal", "Coal, Pipeline Natural Gas", "Process Gas", "Other Solid Fuel", "Coal Refuse" , "Coal, Wood"  
+#Petroleum: "Residual Oil", "Diesel Oil", "Diesel Oil, Other Gas", "Petroleum Coke", "Other Oil" 
+#Gas: "Pipeline Natural Gas", "Natural Gas", "Other Gas"
+#Renewable: "Wood"
+#=================================================================================================================================================================================
+
+
+EF_calculate <- EF_calculate %>%
+  mutate(convert_fuel = case_when(
+    Primary.Fuel.Type %in% c("Coal", "Coal, Pipeline Natural Gas", "Process Gas", "Other Solid Fuel", "Coal Refuse", "Coal, Wood") ~ "Coal",
+    Primary.Fuel.Type %in% c("Residual Oil", "Diesel Oil", "Diesel Oil, Other Gas", "Petroleum Coke", "Other Oil") ~ "Petroleum",
+    Primary.Fuel.Type %in% c("Pipeline Natural Gas", "Natural Gas", "Other Gas") ~ "Gas",
+    Primary.Fuel.Type == "Wood" ~ "Renewable",
+    TRUE ~ "Other" # This line is optional and catches any fuel types not explicitly listed above
+  ))
+
+#=================================================================================================================================================================================
+# First option: calculate each of them and calculate sum by fuel type
+
+# EF_calculate$EF <-  (EF_calculate$SO2.Mass..short.tons.* 2000)/(EF_calculate$Operating.Capacity * 3412000 * 8760 *2)
+# 
+# # Calculate the average EF by convert_fuel categories
+# average_ef_by_convert_fuel <- EF_calculate %>%
+#   group_by(Primary.Fuel.Type, Unit.Type) %>%
+#   summarise(
+#     Average_EF = mean(EF, na.rm = TRUE),
+#     Median_EF = median(EF, na.rm = TRUE),
+#     Min_EF = min(EF, na.rm = TRUE),
+#     Max_EF = max(EF, na.rm = TRUE)
+#   )
+# #     
+# 
+# # View the result
+# print(average_ef_by_convert_fuel)
+
+EF_calculate$EF <-  (EF_calculate$SO2.Mass..short.tons. * 10e06)/(EF_calculate$Gross.Load..MWh.* 10e03) #EF unit: g/KWh
+
+
+
+# Calculate the average EF by convert_fuel categories
+#0 comes from when the SO2 emission is very small
+average_ef_by_convert_fuel <- EF_calculate %>%
+  # Clean Unit.Type by removing parentheses and any content within them
+  mutate(Unit.Type = gsub("\\s*\\(.*?\\)", "", Unit.Type)) %>%
+  # Group by Primary.Fuel.Type and the cleaned Unit.Type
+  group_by(convert_fuel, Unit.Type) %>%
+  summarise(
+    Count = n(),  # Count the number of rows in each group
+    Average_EF = round(mean(EF, na.rm = TRUE), 3),
+    # Median_EF = round(median(EF, na.rm = TRUE), 3),
+    # Min_EF = round(min(EF, na.rm = TRUE), 3),
+    # Max_EF = round(max(EF, na.rm = TRUE), 3),
+    # SD_EF = round(sd(EF, na.rm = TRUE), 3),
+    SE_EF = round(sd(EF, na.rm = TRUE) / sqrt(n()), 3), # Standard Error
+    .groups = "drop"
+  )
+
+#replace NA to 0
+average_ef_by_convert_fuel <- average_ef_by_convert_fuel %>%
+  mutate(
+    Average_EF = ifelse(is.na(Average_EF), 0, Average_EF),
+    SE_EF = ifelse(is.na(SE_EF), 0, SE_EF)
+  )
+
+
+
+# View the result
+print(average_ef_by_convert_fuel)
+
+# Assuming average_ef_by_convert_fuel and EF_calculate are already defined as shown
+# Adjust Unit.Type in EF_calculate by removing parentheses and their content
+EF_calculate <- EF_calculate %>%
+  mutate(Unit.Type = gsub("\\s*\\(.*?\\)", "", Unit.Type))
+# 
+# # Adjust Unit.Type in average_ef_by_convert_fuel similarly
+average_ef_by_convert_fuel <- average_ef_by_convert_fuel %>%
+  mutate(Unit.Type = gsub("\\s*\\(.*?\\)", "", Unit.Type))
+
+# First, join EF_calculate with the Average_EF from average_ef_by_convert_fuel
+EF_calculate_with_max_ef <- EF_calculate %>%
+  left_join(average_ef_by_convert_fuel %>% 
+              dplyr::select(convert_fuel, Unit.Type, Average_EF), 
+            by = c("convert_fuel" = "convert_fuel", "Unit.Type" = "Unit.Type"))
+
+# Next, calculate the so2_estimate column
+EF_calculate_with_max_ef <- EF_calculate_with_max_ef %>%
+  mutate(so2_estimate = (Gross.Load..MWh. * Average_EF*10e03)/10e06)
+
+# Print the head of the updated EF_calculate to verify the new column
+
+
+# EF_calculate_with_max_ef$diff <- round(EF_calculate_with_max_ef$SO2.Mass..short.tons. - EF_calculate_with_max_ef$so2_estimate, 2)
+
+
+head(EF_calculate_with_max_ef)
+
+
+#============================================================================================================================
+# evaluation for fuel types
+#============================================================================================================================
+
+# Define a function to calculate MSE, RMSE, and Pearson correlation
+calculate_metrics <- function(EF_calculate_with_max_ef) {
+  mse <- mean((EF_calculate_with_max_ef$SO2.Mass..short.tons. - EF_calculate_with_max_ef$so2_estimate)^2)
+  rmse <- sqrt(mse)
+  pearson <- cor(EF_calculate_with_max_ef$SO2.Mass..short.tons., EF_calculate_with_max_ef$so2_estimate)
+  return(data.frame(MSE = mse, RMSE = rmse, Pearson = pearson))
+}
+
+# Apply the function by group
+metrics_by_fuel <- EF_calculate_with_max_ef %>%
+  group_by(convert_fuel) %>%
+  summarize(
+    MSE = mean((SO2.Mass..short.tons. - so2_estimate)^2),
+    RMSE = sqrt(mean((SO2.Mass..short.tons. - so2_estimate)^2)),
+    Pearson = cor(SO2.Mass..short.tons., so2_estimate)
+  )
+
+# Print the results
+print(metrics_by_fuel)
+
+
+#============================================================================================================================
+# EF weighted by unit types
+#============================================================================================================================
+
+
+weighted_ef_by_fuel <- average_ef_by_convert_fuel %>%
+  group_by(convert_fuel) %>%
+  summarise(
+    Weighted_Average_EF = sum(Average_EF * Count) / sum(Count),
+    Weighted_SE_EF = sqrt(sum((SE_EF^2 * Count)) / sum(Count))
+  )
+
+
+
+
+
+
+
+#=============================================================================================
+#ggplot
+#=============================================================================================
+#see the differences between
+# average_diff_by_convert_fuel <- EF_calculate_with_max_ef %>%
+#   group_by(Primary.Fuel.Type, Unit.Type) %>%
+#   summarise(
+#     Count = n(),  # Count the number of rows in each group
+#     Average_diff = round(mean(diff, na.rm = TRUE), 2),
+#     Median_diff = round(median(diff, na.rm = TRUE), 2),
+#     Min_diff = round(min(diff, na.rm = TRUE), 2),
+#     Max_diff = round(max(diff, na.rm = TRUE), 2),
+#     Avg_Percentage_Error = round(mean((diff / SO2.Mass..short.tons.) * 100, na.rm = TRUE), 2), #unit %
+#     .groups = "drop"  # Automatically ungroup
+#   )
+
+ef_statistics <- EF_calculate_with_max_ef %>%
+  group_by(Primary.Fuel.Type, Unit.Type) %>%
+  summarise(
+    MSE = mean((so2_estimate - SO2.Mass..short.tons.)^2, na.rm = TRUE),
+    RMSE = sqrt(mean((so2_estimate - SO2.Mass..short.tons.)^2, na.rm = TRUE)),
+    Pearson_Correlation = cor(so2_estimate, SO2.Mass..short.tons., use = "complete.obs"),
+    .groups = "drop"  # Automatically ungroup
+  )
+
+
+
+ggplot(average_diff_by_convert_fuel, aes(x = Unit.Type, y = Count, fill = Unit.Type)) +
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label = paste0(Avg_Percentage_Error, "%")), vjust = -0.5) +
+  facet_wrap(~ Primary.Fuel.Type, scales = "free_x") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(y = "Count", x = "Unit Type", title = "Count and Average Percentage Error by Unit Type") +
+  scale_fill_discrete(name = "Unit Type")
+
+#=============================================================================================
+#ggplot for different fuel type
+# Filter for "Coal" in Primary.Fuel.Type
+coal_data <- average_diff_by_convert_fuel %>%
+  filter(Primary.Fuel.Type == "Pipeline Natural Gas")
+
+# Create the plot
+ggplot(coal_data, aes(x = reorder(Unit.Type, Count), y = Count)) + 
+  geom_col(aes(fill = Unit.Type), show.legend = FALSE) +
+  geom_text(aes(label = paste0(Avg_Percentage_Error, "%"), y = Count), vjust = -0.3, size = 5) +  # Adjusted size for percentage labels
+  labs(x = "Unit Type", y = "Count", title = "Count and Average Percentage Error for Diesel Oil") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),  # Increased x-axis label size
+    axis.text.y = element_text(size = 14),  # Increased y-axis label size
+    axis.title.x = element_text(size = 16),  # Increased x-axis title size
+    axis.title.y = element_text(size = 16),  # Increased y-axis title size
+    plot.title = element_text(size = 20, hjust = 0.5)  # Increased plot title size and centered
+  ) +
+  scale_fill_brewer(palette = "Set3")
+#========================================================================
+#evaluation part
+
+metrics_by_fuel_type <- EF_calculate_with_max_ef %>%
+  group_by(Primary.Fuel.Type, Unit.Type) %>%
+  summarise(
+    RMSE = round(sqrt(mean((SO2.Mass..short.tons. - so2_estimate)^2, na.rm = TRUE)), 2),
+    MB = round(mean(SO2.Mass..short.tons. - so2_estimate, na.rm = TRUE), 2),
+    NME = round(mean(abs(SO2.Mass..short.tons. - so2_estimate) / SO2.Mass..short.tons., na.rm = TRUE) * 100, 2),
+    NMB = round(mean((SO2.Mass..short.tons. - so2_estimate) / SO2.Mass..short.tons., na.rm = TRUE) * 100, 2),
+    Pearson = round(cor(SO2.Mass..short.tons., so2_estimate, method = "pearson", use = "complete.obs"), 2),
+    Spearman = round(cor(SO2.Mass..short.tons., so2_estimate, method = "spearman", use = "complete.obs"), 2)
+  ) %>%
+  ungroup()
+
+
+
+EF_calculate_with_max_ef$diff <- EF_calculate_with_max_ef$so2_estimate - EF_calculate_with_max_ef$SO2.Mass..short.tons.
+
+
+EF_calculate_with_max_ef$rate <- 1 - (EF_calculate_with_max_ef$diff/EF_calculate_with_max_ef$SO2.Mass..short.tons.)
+
+EF_calculate_with_max_ef_filtered <- EF_calculate_with_max_ef %>%
+  filter(rate <= 50 & rate >= -50)
+
+# Calculate the average EF by convert_fuel categories
+average_rate <- EF_calculate_with_max_ef %>%
+  group_by(Primary.Fuel.Type) %>%
+  summarise(
+    Average_rate = mean(rate, na.rm = TRUE),
+    Median_rate = median(rate, na.rm = TRUE),
+    Min_rate = min(rate, na.rm = TRUE),
+    Max_rate = max(rate, na.rm = TRUE)
+  ) 
+
+
+
+average_rate_adjust <- EF_calculate_with_max_ef_filtered %>%
+  group_by(Primary.Fuel.Type) %>%
+  summarise(
+    Average_rate = mean(rate, na.rm = TRUE),
+    Median_rate = median(rate, na.rm = TRUE),
+    Min_rate = min(rate, na.rm = TRUE),
+    Max_rate = max(rate, na.rm = TRUE)
+  ) 
+
+
+
+EF_calculate_with_max_ef_filtered$adjust_so2 <- EF_calculate_with_max_ef_filtered$so2_estimate/(1+EF_calculate_with_max_ef_filtered$rate)
+
+
+
