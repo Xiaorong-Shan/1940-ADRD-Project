@@ -7,6 +7,10 @@ library(readxl)
 library(raster)
 library(fst)
 
+#========================================================================================================
+# pp IDW SO2 emission input is coming from the EF*max_capacity (EIA)
+#========================================================================================================
+
 generator2010ret <- read_excel( '/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/december_generator2022.xlsx',
                                       sheet = 3, skip = 2) %>% data.table
 generator2010act <- read_excel( '/home/xshan2/HAQ_LAB/xshan2/R_Code/powerplant/december_generator2022.xlsx',
