@@ -227,12 +227,14 @@ print(emission_summary)
 #    4151.17827
 
 
-# Create the plot
-colors <- c("#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33")
+
 
 #======================================================================================================
 # Filter for CO only
 co_data <- merged_data[emission_type == "CO"]
+
+# Create the plot
+colors <- c("#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33")
 
 # Now plot
 p <- ggplot() +
