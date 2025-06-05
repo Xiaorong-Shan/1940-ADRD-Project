@@ -413,7 +413,7 @@ p <- ggplot() +
     )
   ) +
   theme_minimal() +
- labs(title = 2010 HC) + 
+ labs(title = "2010 HC") + 
   theme(
     rect = element_blank(),
     axis.text.x = element_blank(),
