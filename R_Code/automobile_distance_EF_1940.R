@@ -81,7 +81,7 @@ PM10_factor <- 0.8
 HC <- HC_factor * 302188000000
 NOx <- NOx_factor * 302188000000
 CO <- CO_factor * 302188000000
-PM10 <- PM10_factor * 302188000000
+PM10 <- PM10_factor * 302188000000 
 
 # Sum the 1940 TOTAL gasoline consumed
 Weight_1940 <- sum(auto_state_total.g$TOTAL, na.rm = TRUE)
