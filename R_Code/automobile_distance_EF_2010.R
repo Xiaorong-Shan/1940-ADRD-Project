@@ -69,7 +69,7 @@ auto_state_total.g <- merge (roadiness.trans.county, auto_state_total_fips, by="
 #========================================================================
 # distance-based EF
 #========================================================================
-#different emission sources in 1940: 1 teragram = 1102311.3109 ton
+#different emission sources in 2010
 #unit: kg/year
 # Constants for emission factors (kg per kg of gasoline consumed)
 HC_factor <- 1.0
@@ -83,7 +83,7 @@ NOx <- NOx_factor * 2966506000000
 CO <- CO_factor * 2966506000000
 PM10 <- PM10_factor * 2966506000000
 
-# Sum the 1940 TOTAL gasoline consumed
+# Sum the 2010 TOTAL gasoline consumed
 Weight_2010 <- sum(auto_state_total.g$TOTAL, na.rm = TRUE)
 
 # Add empty columns for each pollutant at state level
@@ -119,13 +119,13 @@ auto_county_pop <- merge(auto_state_total.g, county_pop, by.x=c("state", "county
 auto_county_pop.dt <- auto_county_pop %>%
   group_by(state) %>%
   mutate(
-    state_1940_pop = sum(A00AA1940, na.rm = TRUE)
+    state_2010_pop = sum(AV0AA2010, na.rm = TRUE)
   ) %>%
   ungroup()
 
 auto_county_pop.dt <- as.data.table(auto_county_pop.dt)
 
-setnames(auto_county_pop.dt, "A00AA1940", "county_1940_pop")
+setnames(auto_county_pop.dt, "AV0AA2010", "county_2010_pop")
 
 
 # List of pollutants to loop through
@@ -139,7 +139,7 @@ for (pollutant in pollutants) {
   
   # Calculate county-level emissions based on the proportion of population
   auto_county_pop.dt[[county_col_name]] <- auto_county_pop.dt[[state_col_name]] * 
-    (auto_county_pop.dt$county_1940_pop / auto_county_pop.dt$state_1940_pop)
+    (auto_county_pop.dt$county_2010_pop / auto_county_pop.dt$state_2010_pop)
 }
 
 # View the updated dataframe
@@ -190,8 +190,8 @@ auto_county_total_no_geom.saved.m[, emission_type := sub("^[^_]+_([^_]+)_.*$", "
 auto_county_total_no_geom.saved.m[, emission_value := emission_value / 1000] #unit: tons/km^3
 
 
-#write.csv(auto_county_total_no_geom.saved.m, "/home/xshan2/HAQ_LAB/xshan2/R_Code/Auto_emissions/auto_county_1940_DistanceEF_NHGIS.csv" )
-#write.csv(auto_county_total_no_geom.saved.m, "/scratch/xshan2/R_Code/Automobiles/auto_county_1940_DistanceEF_NHGIS.csv" )
+#write.csv(auto_county_total_no_geom.saved.m, "/home/xshan2/HAQ_LAB/xshan2/R_Code/Auto_emissions/auto_county_2010_DistanceEF_NHGIS.csv" )
+#write.csv(auto_county_total_no_geom.saved.m, "/scratch/xshan2/R_Code/Automobiles/auto_county_2010_DistanceEF_NHGIS.csv" )
 
 #====================================================================================================================
 #plot
@@ -256,7 +256,7 @@ p <- ggplot() +
     )
   ) +
   theme_minimal() +
-  labs(title = "1940 CO") + 
+  labs(title = "2010 CO") + 
   theme(
     rect = element_blank(),
     axis.text.x = element_blank(),
@@ -274,7 +274,7 @@ p <- ggplot() +
   )
 
 # Save the plot
-ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_CO.pdf", plot = p, device = "pdf", width = 7, height = 5)
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_2010_distance_EF_weighted_CO.pdf", plot = p, device = "pdf", width = 7, height = 5)
   
 
 colors <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c")
