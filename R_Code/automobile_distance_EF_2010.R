@@ -108,16 +108,12 @@ county_pop <- data.table(county_pop)
 county_pop[, STATEFP := sprintf("%02d", as.numeric(STATEFP))]
 county_pop[, COUNTYFP := sprintf("%03d", as.numeric(COUNTYFP))]
 
-# Convert 2-digit state to 3-digit, 3-digit county to 4-digit by appending '0'
-county_pop$STATEFP <- paste0(county_pop$STATEFP, "0")
-county_pop$COUNTYFP <- paste0(county_pop$COUNTYFP, "0")
-
-auto_county_pop <- merge(auto_state_total.g, county_pop, by.x=c("state", "county"), by.y=c("STATEFP", "COUNTYFP") )
+auto_county_pop <- merge(auto_state_total.g, county_pop, by.x=c("statefp10", "countyfp10"), by.y=c("STATEFP", "COUNTYFP") )
 
 #frist calculate state population
 
 auto_county_pop.dt <- auto_county_pop %>%
-  group_by(state) %>%
+  group_by(statefp10) %>%
   mutate(
     state_2010_pop = sum(AV0AA2010, na.rm = TRUE)
   ) %>%
@@ -171,14 +167,14 @@ auto_county_pop.dt[, .(GISJOIN,
 auto_county_pop.dt <- st_as_sf(auto_county_pop.dt)
 auto_county_total_no_geom <- st_drop_geometry(auto_county_pop.dt)
 
-auto_county_total_no_geom.saved <- auto_county_total_no_geom[, .(decade, nhgisnam, statenam, state, county, county_HC_areaWeighted, county_PM10_areaWeighted, county_CO_areaWeighted, county_NOx_areaWeighted)]
+auto_county_total_no_geom.saved <- auto_county_total_no_geom[, .(statefp10, countyfp10, name10, STATE.y, county_HC_areaWeighted, county_PM10_areaWeighted, county_CO_areaWeighted, county_NOx_areaWeighted)]
 
 #transpose the table
 # Ensure you're using data.table syntax
 auto_county_total_no_geom.saved.m <- as.data.table(auto_county_total_no_geom.saved)[
   ,
   melt(.SD,
-       id.vars = c('decade', 'state', 'county', 'statenam', 'nhgisnam'),
+       id.vars = c('statefp10', 'countyfp10', 'name10', 'STATE.y'),
        variable.name = 'emission_type',
        value.name = 'emission_value')
 ]
@@ -203,7 +199,7 @@ setDT(roadiness.trans.county)
 merged_data <- merge(
   auto_county_total_no_geom.saved.m,
   roadiness.trans.county,
-  by = c("state", "county"),
+  by = c("statefp10", "countyfp10"),
   all.x = TRUE  # left join to keep all rows from auto_county_total_no_geom.saved.m
 )
 
@@ -220,20 +216,21 @@ emission_summary <- merged_data[, .(
 
 print(emission_summary)
 #  emission_type          min        q1     median      mean         q3
-#             HC 0.0089296659 1.3562302  2.6024079 15.501681  4.6067563
-#           PM10 0.0008606907 0.1307210  0.2508345  1.494138  0.4440247
-#             CO 0.0574511032 8.7256254 16.7432024 99.733708 29.6386489
-#            NOx 0.0036579354 0.5555642  1.0660466  6.350086  1.8871050
-#          max
-#    6251.7813
-#     602.5813
-#   40222.3039
-#    2560.9707
+#             HC 4.726724e-03 0.82786796 2.02836854 10.6720211  5.1417059
+#           PM10 9.453448e-05 0.01655736 0.04056737  0.2134404  0.1028341
+#             CO 5.199397e-03 0.91065475 2.23120539 11.7392232  5.6558765
+#            NOx 9.453448e-03 1.65573591 4.05673707 21.3440421 10.2834117
+#           max
+#    2075.58913
+#      41.51178
+#    2283.14805
+#    4151.17827
 
 
 # Create the plot
 colors <- c("#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33")
 
+#======================================================================================================
 # Filter for CO only
 co_data <- merged_data[emission_type == "CO"]
 
@@ -243,9 +240,9 @@ p <- ggplot() +
   coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
   scale_fill_gradientn(
     colors = colors,
-    limits = c(0, 5),
-    breaks = c(0, 2.5, 5),
-    labels = c('0', '2.5', '5'),
+    limits = c(0, 6),
+    breaks = c(0, 3, 6),
+    labels = c('0', '3', '6'),
     oob = scales::squish,
     guide = guide_colorbar(
       title.position = "top",
@@ -277,10 +274,56 @@ p <- ggplot() +
 ggsave("/scratch/xshan2/R_Code/Correlation/auto_2010_distance_EF_weighted_CO.pdf", plot = p, device = "pdf", width = 7, height = 5)
   
 
+
+#======================================================================================================
+# Filter for NOx only
+nox_data <- merged_data[emission_type == "NOx"]
 colors <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c")
 
+# Now plot
+p <- ggplot() +
+  geom_sf(data = nox_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors,
+    limits = c(0, 10),
+    breaks = c(0, 5, 10),
+    labels = c('0', '5', '10'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+  labs(title = "2010 NOx") + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_2010_distance_EF_weighted_NOx.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
 
 
+#======================================================================================================
+# Filter for PM10 only
+pm10_data <- merged_data[emission_type == "PM10"]
 
 colors_purple <- c(
   "#f2f0f7",  # very light lavender
@@ -292,7 +335,51 @@ colors_purple <- c(
   "#4a1486"   # dark violet
 )
 
+# Now plot
+p <- ggplot() +
+  geom_sf(data = pm10_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors_purple,
+    limits = c(0, 0.1),
+    breaks = c(0, 0.05, 0.1),
+    labels = c('0', '0.05', '0.1'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+ labs(title = expression("2010 " * PM[10])) + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_2010_distance_EF_weighted_PM10.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
+
+
+
+#======================================================================================================
+# Filter for HC only
+HC_data <- merged_data[emission_type == "HC"]
 
 colors_green <- c(
   "#f7fcf5",  # very pale mint
@@ -303,6 +390,50 @@ colors_green <- c(
   "#31a354",  # strong green
   "#006d2c"   # dark forest green
 )
+
+
+# Now plot
+p <- ggplot() +
+  geom_sf(data = HC_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors_green,
+    limits = c(0, 5),
+    breaks = c(0, 2.5, 5),
+    labels = c('0', '2.5', '5'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+ labs(title = 2010 HC) + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_2010_distance_EF_weighted_HC.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
+
+
+
 
 
 
