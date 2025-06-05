@@ -269,3 +269,25 @@ ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_CO.pdf
   
 
 colors <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c")
+
+colors_purple <- c(
+  "#f2f0f7",  # very light lavender
+  "#dadaeb",
+  "#bcbddc",
+  "#9e9ac8",
+  "#807dba",
+  "#6a51a3",  # strong medium purple
+  "#4a1486"   # dark violet
+)
+
+
+
+colors_green <- c(
+  "#f7fcf5",  # very pale mint
+  "#e5f5e0",
+  "#c7e9c0",
+  "#a1d99b",
+  "#74c476",
+  "#31a354",  # strong green
+  "#006d2c"   # dark forest green
+)
