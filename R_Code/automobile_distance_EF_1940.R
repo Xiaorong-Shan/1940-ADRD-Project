@@ -78,10 +78,10 @@ CO_factor <- 53.4
 PM10_factor <- 0.8
 
 # National gasoline consumption converted to kg for each pollutant
-HC <- HC_factor * 47003000000
-NOx <- NOx_factor * 47003000000
-CO <- CO_factor * 47003000000
-PM10 <- PM10_factor * 47003000000
+HC <- HC_factor * 302188000000
+NOx <- NOx_factor * 302188000000
+CO <- CO_factor * 302188000000
+PM10 <- PM10_factor * 302188000000
 
 # Sum the 1940 TOTAL gasoline consumed
 Weight_1940 <- sum(auto_state_total.g$TOTAL, na.rm = TRUE)
