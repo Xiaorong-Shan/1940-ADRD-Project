@@ -233,11 +233,12 @@ print(emission_summary)
 #   40222.3039
 #    2560.9707
 
-# Create the plot
-colors <- c("#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33")
-
+#======================================================================================================
 # Filter for CO only
 co_data <- merged_data[emission_type == "CO"]
+
+# Create the plot
+colors <- c("#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#e34a33")
 
 # Now plot
 p <- ggplot() +
@@ -245,9 +246,9 @@ p <- ggplot() +
   coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
   scale_fill_gradientn(
     colors = colors,
-    limits = c(0, 5),
-    breaks = c(0, 2.5, 5),
-    labels = c('0', '2.5', '5'),
+    limits = c(0, 6),
+    breaks = c(0, 3, 6),
+    labels = c('0', '3', '6'),
     oob = scales::squish,
     guide = guide_colorbar(
       title.position = "top",
@@ -279,7 +280,56 @@ p <- ggplot() +
 ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_CO.pdf", plot = p, device = "pdf", width = 7, height = 5)
   
 
+
+#======================================================================================================
+# Filter for NOx only
+nox_data <- merged_data[emission_type == "NOx"]
 colors <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c")
+
+# Now plot
+p <- ggplot() +
+  geom_sf(data = nox_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors,
+    limits = c(0, 10),
+    breaks = c(0, 5, 10),
+    labels = c('0', '5', '10'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+  labs(title = "1940 NOx") + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_NOx.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
+
+
+#======================================================================================================
+# Filter for PM10 only
+pm10_data <- merged_data[emission_type == "PM10"]
 
 colors_purple <- c(
   "#f2f0f7",  # very light lavender
@@ -291,7 +341,51 @@ colors_purple <- c(
   "#4a1486"   # dark violet
 )
 
+# Now plot
+p <- ggplot() +
+  geom_sf(data = pm10_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors_purple,
+    limits = c(0, 0.1),
+    breaks = c(0, 0.05, 0.1),
+    labels = c('0', '0.05', '0.1'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+ labs(title = expression("1940 " * PM[10])) + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_PM10.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
+
+
+
+#======================================================================================================
+# Filter for HC only
+HC_data <- merged_data[emission_type == "HC"]
 
 colors_green <- c(
   "#f7fcf5",  # very pale mint
@@ -302,3 +396,44 @@ colors_green <- c(
   "#31a354",  # strong green
   "#006d2c"   # dark forest green
 )
+
+
+# Now plot
+p <- ggplot() +
+  geom_sf(data = HC_data, aes(fill = emission_value, geometry = geometry), size = 0.1) +
+  coord_sf(xlim = c(-3000000, 2500000), ylim = c(-2000000, 1500000), expand = FALSE) +
+  scale_fill_gradientn(
+    colors = colors_green,
+    limits = c(0, 5),
+    breaks = c(0, 2.5, 5),
+    labels = c('0', '2.5', '5'),
+    oob = scales::squish,
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      label.position = "bottom",
+      barwidth = 20,
+      barheight = 1
+    )
+  ) +
+  theme_minimal() +
+ labs(title = "1940 HC") + 
+  theme(
+    rect = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    legend.title = element_text(size = 16),  # Make the legend title bigger
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 30, face = "bold"),
+    legend.key.size = unit(1, "cm"),
+    plot.title = element_text(size = 25, hjust = 0.5),
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# Save the plot
+ggsave("/scratch/xshan2/R_Code/Correlation/auto_1940_distance_EF_weighted_HC.pdf", plot = p, device = "pdf", width = 7, height = 5)
+  
